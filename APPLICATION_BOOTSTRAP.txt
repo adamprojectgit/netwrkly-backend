@@ -1,0 +1,140 @@
+Netwrkly Application Bootstrap Process
+====================================
+
+1. NetwrklyApplication Class
+---------------------------
+The NetwrklyApplication class is the entry point of the Spring Boot application. It's a minimal class with two key components:
+
+1. @SpringBootApplication Annotation:
+   - This is a composite annotation that combines three other annotations:
+     * @Configuration: Marks the class as a source of bean definitions
+     * @EnableAutoConfiguration: Tells Spring Boot to start adding beans based on classpath settings
+     * @ComponentScan: Tells Spring to look for other components in the com.netwrkly package
+
+2. Main Method:
+   - The static main method is the entry point of the application
+   - Uses SpringApplication.run() to bootstrap the application
+   - Takes two parameters:
+     * NetwrklyApplication.class: The primary source class
+     * args: Command line arguments
+
+2. Component Scanning
+--------------------
+When the application starts, Spring Boot scans the following packages and their subpackages:
+- com.netwrkly
+- com.netwrkly.auth
+- com.netwrkly.profile
+
+This scanning process discovers and initializes:
+1. Controllers:
+   - AuthenticationController
+   - ProfileController
+
+2. Services:
+   - AuthenticationService
+   - EmailService
+   - ProfileService
+
+3. Repositories:
+   - UserRepository
+   - CreatorProfileRepository
+   - BrandProfileRepository
+
+4. Models:
+   - User
+   - CreatorProfile
+   - BrandProfile
+
+5. Configuration:
+   - SecurityConfig
+   - Other configuration classes
+
+3. Auto-Configuration
+--------------------
+Spring Boot automatically configures:
+1. Web Environment:
+   - Spring MVC
+   - Embedded Tomcat server
+   - REST endpoints
+
+2. Database:
+   - JPA/Hibernate
+   - PostgreSQL connection
+   - Repository implementations
+
+3. Security:
+   - Spring Security
+   - JWT authentication
+   - CORS configuration
+
+4. Email:
+   - JavaMailSender
+   - Email templates
+
+4. Application Properties
+------------------------
+The application reads configuration from:
+1. application.properties:
+   - Database connection
+   - Server port
+   - JWT settings
+   - Email settings
+
+2. Environment Variables:
+   - Database credentials
+   - Email credentials
+   - Other sensitive data
+
+5. Component Interactions
+------------------------
+1. During Startup:
+   - Spring Boot initializes the application context
+   - Loads all components discovered through scanning
+   - Configures beans and their dependencies
+   - Sets up the web environment
+
+2. Runtime:
+   - Controllers handle HTTP requests
+   - Services process business logic
+   - Repositories manage data access
+   - Security filters protect endpoints
+
+3. Database:
+   - Hibernate creates/updates tables
+   - JPA manages entity relationships
+   - Repositories provide data access methods
+
+6. Application Flow
+------------------
+1. Request Handling:
+   HTTP Request → Controller → Service → Repository → Database
+
+2. Authentication Flow:
+   Login Request → Security Filter → AuthenticationService → JWT Generation
+
+3. Profile Management:
+   Profile Request → ProfileController → ProfileService → Profile Repository
+
+7. Error Handling
+----------------
+1. Global Exception Handler:
+   - Catches and processes exceptions
+   - Returns appropriate HTTP responses
+   - Logs errors for debugging
+
+2. Validation:
+   - Input validation
+   - Business rule validation
+   - Security validation
+
+8. Monitoring and Logging
+------------------------
+1. Spring Boot Actuator:
+   - Health checks
+   - Metrics
+   - Environment information
+
+2. Logging:
+   - Application logs
+   - Security logs
+   - Database logs 

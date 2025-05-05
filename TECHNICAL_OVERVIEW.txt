@@ -1,0 +1,202 @@
+Netwrkly Technical Overview
+=========================
+
+1. Application Architecture
+--------------------------
+The Netwrkly application follows a modern microservices-inspired architecture with a clear separation between frontend and backend:
+
+Frontend (React + TypeScript):
+- Built with React and TypeScript
+- Uses Material-UI for component styling
+- Implements form validation using Formik and Yup
+- Manages authentication state using React Context
+- Communicates with backend via RESTful API calls
+
+Backend (Spring Boot):
+- Built with Spring Boot 3.2.3
+- Uses Spring Security for authentication and authorization
+- Implements JPA/Hibernate for database operations
+- PostgreSQL database for data persistence
+- JWT-based authentication system
+
+2. Authentication Flow
+---------------------
+1. User Registration:
+   - Frontend collects user email, password, and role (CREATOR/BRAND)
+   - Validates input using Yup schema
+   - Sends POST request to /api/auth/register
+   - Backend creates user, generates verification token
+   - Sends verification email via EmailService
+   - User must verify email before login
+
+2. User Login:
+   - Frontend sends credentials to /api/auth/login
+   - Backend validates credentials using AuthenticationService
+   - On success, generates JWT token
+   - Frontend stores token in localStorage
+   - Token used for subsequent authenticated requests
+
+3. Password Reset:
+   - User requests password reset
+   - Backend generates reset token
+   - Sends reset email via EmailService
+   - User clicks link and sets new password
+
+3. Profile Management
+--------------------
+1. Creator Profile:
+   - One-to-one relationship with User entity
+   - Stores content creator specific information:
+     * Video intro URL
+     * Content reel URLs
+     * Bio
+     * Niches
+     * Content types
+     * Social media stats
+
+2. Brand Profile:
+   - One-to-one relationship with User entity
+   - Stores brand specific information:
+     * Company name
+     * Company logo
+     * Industry
+     * Company description
+     * Preferred creator niches
+     * Preferred content types
+     * Website and LinkedIn URLs
+
+4. Security Implementation
+-------------------------
+1. Spring Security Configuration:
+   - CSRF protection disabled (using JWT)
+   - CORS configured for frontend (localhost:3000)
+   - Stateless session management
+   - Role-based access control
+   - JWT authentication filter
+
+2. Password Security:
+   - BCrypt password hashing (strength factor: 12)
+   - Password policy validation
+   - Rate limiting for login attempts
+
+3. API Security:
+   - JWT token validation
+   - Role-based endpoint access
+   - Secure headers configuration
+
+5. Database Schema
+-----------------
+1. User Table:
+   - id (PK)
+   - email (unique)
+   - password (hashed)
+   - role (enum)
+   - email_verified
+   - verification_token
+   - reset_password_token
+   - reset_password_token_expiry
+   - enabled
+   - created_at
+   - updated_at
+
+2. Creator Profile Table:
+   - id (PK)
+   - user_id (FK)
+   - video_intro_url
+   - bio
+   - niches (array)
+   - content_types (array)
+   - social media stats
+   - is_verified
+   - created_at
+   - updated_at
+
+3. Brand Profile Table:
+   - id (PK)
+   - user_id (FK)
+   - company_name
+   - company_logo_url
+   - industry
+   - company_description
+   - preferred_creator_niches (array)
+   - preferred_content_types (array)
+   - website_url
+   - linkedin_url
+   - is_verified
+   - created_at
+   - updated_at
+
+6. API Endpoints
+---------------
+1. Authentication:
+   POST /api/auth/register
+   POST /api/auth/login
+   GET /api/auth/verify
+   POST /api/auth/forgot-password
+   POST /api/auth/reset-password
+
+2. Profile Management:
+   POST /api/profiles/creator
+   POST /api/profiles/brand
+   PUT /api/profiles/creator
+   PUT /api/profiles/brand
+   GET /api/profiles/creator
+   GET /api/profiles/brand
+   GET /api/profiles/creators/search
+   GET /api/profiles/brands/search
+
+7. Frontend-Backend Communication
+--------------------------------
+1. API Service Layer:
+   - Centralized API calls
+   - JWT token management
+   - Error handling
+   - Response type definitions
+
+2. Authentication Context:
+   - Manages user authentication state
+   - Handles login/logout
+   - Provides authentication status to components
+
+3. Form Handling:
+   - Formik for form state management
+   - Yup for validation
+   - Error display
+   - Loading states
+
+8. Development Setup
+-------------------
+1. Backend Requirements:
+   - Java 17
+   - Maven
+   - PostgreSQL 14
+   - Spring Boot 3.2.3
+
+2. Frontend Requirements:
+   - Node.js
+   - npm/yarn
+   - React
+   - TypeScript
+
+3. Database Setup:
+   - PostgreSQL running on port 5432
+   - Database name: netwrkly
+   - Default credentials: postgres/postgres
+
+9. Future Considerations
+-----------------------
+1. Scalability:
+   - Implement caching layer
+   - Add database indexing
+   - Consider microservices architecture
+
+2. Security:
+   - Implement OAuth2
+   - Add 2FA support
+   - Enhanced rate limiting
+
+3. Features:
+   - Real-time messaging
+   - File upload service
+   - Analytics dashboard
+   - Payment integration 

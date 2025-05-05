@@ -1,0 +1,100 @@
+Netwrkly Product Requirements Document (PRD)
+1. Title and Overview
+1.1 Document Title & Version
+Netwrkly PRD
+ Version: 1.0
+1.2 Product Summary
+Netwrkly is a LinkedIn-style platform designed for content creators and brands. It provides a data-driven matchmaking experience, allowing brands to discover and connect with creators seamlessly. The platform prioritizes long-term placements over one-off collaborations, introducing an innovative creator profile format with video intros, content reels, and social media stats. AI-driven recommendations ensure optimal brand-creator alignment based on niche, audience, and content style.
+2. User Personas
+2.1 Key User Types
+Content Creators: Users looking to showcase their portfolio, receive job recommendations, and apply for brand collaborations.
+Brands & Recruiters: Users searching for content creators based on niche and expertise to establish long-term partnerships.
+Administrators: Internal users managing platform operations, reviewing profiles, and handling disputes.
+2.2 Basic Persona Details
+Content Creators: Social media influencers, videographers, UGC creators, bloggers, and content strategists.
+Brands & Recruiters: Marketing managers, social media agencies, and brands looking for influencer partnerships.
+Administrators: Platform managers responsible for maintaining content quality and security.
+2.3 Role-based Access
+Creators: Can create a profile, upload portfolio content, browse job posts, receive AI-driven recommendations, and apply for opportunities.
+Brands: Can post job opportunities, search creator profiles, send collaboration requests, and manage shortlists.
+Administrators: Can review reports, approve/reject accounts, handle disputes, and manage the platform’s operational settings.
+3. User Stories
+Authentication & Authorization
+US-001 - User Registration & Authentication
+ Description: As a user, I want to register and log in securely so that I can access my profile and features.
+ Acceptance Criteria:
+Users must provide an email and password or use social login.
+Password reset functionality should be available.
+Email verification required before first login.
+US-002 - Role-Based Access
+ Description: As a user, I should only be able to access features relevant to my role.
+ Acceptance Criteria:
+Creators cannot access brand-only features and vice versa.
+Admins should have full control over managing users.
+Profile & Portfolio Management
+US-003 - Creator Profile Setup
+ Description: As a creator, I want to set up a profile with video intros, content reels, and social stats.
+ Acceptance Criteria:
+Profile includes a video intro upload option.
+Creators can link social media accounts for automated stats retrieval.
+Users can update their profile at any time.
+US-004 - Brand Profile Setup
+ Description: As a brand, I want to create a profile showcasing my company, industry, and collaboration preferences.
+ Acceptance Criteria:
+Brands can upload company logos, descriptions, and preferred creator niches.
+Brands can update their profiles at any time.
+Job Posting & Discovery
+US-005 - Job Posting by Brands
+ Description: As a brand, I want to post job opportunities with filters so that relevant creators can discover them.
+ Acceptance Criteria:
+Brands must fill in job details (title, description, compensation, duration, niche).
+Job posts should be searchable and filterable.
+US-006 - Job Discovery for Creators
+ Description: As a creator, I want to browse and filter job listings based on niche and content type.
+ Acceptance Criteria:
+Creators can filter jobs by industry, content type, and budget.
+AI-driven recommendations suggest the best job matches.
+Matchmaking & Connection
+US-007 - AI-Powered Matchmaking
+ Description: As a user, I want AI-driven recommendations for collaborations.
+ Acceptance Criteria:
+Creators receive recommended jobs based on their profile.
+Brands receive suggested creators based on niche and engagement metrics.
+US-008 - Instant Connection
+ Description: As a user, I want to connect instantly with matched profiles.
+ Acceptance Criteria:
+Users can send connection requests with a short introduction message.
+Notifications alert users about new matches.
+Long-Term Collaboration Features
+US-009 - Long-Term Placement Management
+ Description: As a brand, I want to track ongoing collaborations with creators.
+ Acceptance Criteria:
+Brands can manage a dashboard for active collaborations.
+Creators can review ongoing contracts and deadlines.
+US-010 - Performance Tracking & Reporting
+ Description: As a brand, I want to measure creator performance during a campaign.
+ Acceptance Criteria:
+Engagement metrics are pulled from social accounts.
+Brands receive reports summarizing content reach and performance.
+Platform Moderation & Admin Controls
+US-011 - Profile Approval & Verification
+ Description: As an admin, I want to review and approve new users before they access the platform.
+ Acceptance Criteria:
+Profiles are manually reviewed before activation.
+Verified creators receive a badge.
+US-012 - Reporting & Dispute Resolution
+ Description: As a user, I want to report inappropriate content or users.
+ Acceptance Criteria:
+Users can submit a report with reasons and evidence.
+Admins can review and take necessary actions.
+Notifications & Alerts
+US-013 - Job & Match Notifications
+ Description: As a user, I want to receive notifications about new job matches and connection requests.
+ Acceptance Criteria:
+Users are notified via email and in-app alerts.
+Notifications can be managed from user settings.
+US-014 - Message Alerts
+ Description: As a user, I want to receive alerts when I get messages from potential matches.
+ Acceptance Criteria:
+Users receive real-time chat notifications.
+Read receipts are enabled.
