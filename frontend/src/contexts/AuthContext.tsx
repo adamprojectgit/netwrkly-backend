@@ -8,6 +8,9 @@ import {
     UserCredential
 } from 'firebase/auth';
 import { auth } from '../config/firebase';
+import axios from 'axios';
+
+const API_URL = 'https://netwrkly-backend.onrender.com/api';
 
 interface User {
     id: string;
@@ -58,12 +61,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     const register = async (email: string, password: string, role: 'CREATOR' | 'BRAND') => {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        // Store the role in the user's profile
-        await updateProfile(userCredential.user, {
-            displayName: role
-        });
-        return userCredential;
+        try {
+            // First create the user in Firebase
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            
+            // Get the Firebase ID token
+            const idToken = await userCredential.user.getIdToken();
+            
+            // Then create the user in your backend
+            await axios.post(`${API_URL}/auth/register`, {
+                email,
+                role,
+                firebaseUid: userCredential.user.uid
+            }, {
+                headers: {
+                    Authorization: `Bearer ${idToken}`
+                }
+            });
+
+            // Store the role in Firebase profile
+            await updateProfile(userCredential.user, {
+                displayName: role
+            });
+
+            return userCredential;
+        } catch (error: any) {
+            console.error('Registration error:', error);
+            throw error;
+        }
     };
 
     const logout = async () => {
