@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'https://netwrkly-backend.onrender.com/api';
+const API_URL = process.env.REACT_APP_API_URL || 'https://netwrkly-backend.onrender.com/api';
 
 const api = axios.create({
     baseURL: API_URL,
@@ -17,6 +17,22 @@ api.interceptors.request.use((config) => {
     }
     return config;
 });
+
+export const authService = {
+    register: async (data: { email: string; role: string; firebaseUid: string }, token: string) => {
+        try {
+            const response = await api.post('/auth/register', data, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            return response.data;
+        } catch (error: any) {
+            console.error('Registration error:', error);
+            throw error;
+        }
+    }
+};
 
 export const creatorProfileService = {
     getProfile: async () => {
