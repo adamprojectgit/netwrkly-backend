@@ -36,35 +36,37 @@ public class SecurityConfig {
     private UserDetailsService userDetailsService;
     
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf(csrf -> csrf.disable())
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .headers(headers -> headers
-                .frameOptions(frame -> frame.deny())
-            )
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/uploads/**").permitAll()
-                .requestMatchers("/api/health").permitAll()
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                .requestMatchers("/api/creator/**").hasRole("CREATOR")
-                .requestMatchers("/api/brand/**").hasRole("BRAND")
-                .anyRequest().authenticated()
-            )
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
-            .authenticationProvider(authenticationProvider())
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-        
-        return http.build();
-    }
+public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    http
+        .csrf(csrf -> csrf.disable())
+        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+        .headers(headers -> headers.frameOptions(frame -> frame.deny()))
+        .authorizeHttpRequests(auth -> auth
+            // allow pre-flight CORS checks
+            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+            // your existing rules
+            .requestMatchers("/api/auth/**").permitAll()
+            .requestMatchers("/api/uploads/**").permitAll()
+            .requestMatchers("/api/health").permitAll()
+            .requestMatchers("/api/admin/**").hasRole("ADMIN")
+            .requestMatchers("/api/creator/**").hasRole("CREATOR")
+            .requestMatchers("/api/brand/**").hasRole("BRAND")
+
+            // everything else needs authentication
+            .anyRequest().authenticated()
+        )
+        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authenticationProvider(authenticationProvider())
+        .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+
+    return http.build();
+}
     
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000")); // Add your frontend URL
+        configuration.setAllowedOrigins(List.of("http://localhost:3000", "https://netwrkly.app")); // Added production domain
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
         configuration.setExposedHeaders(Arrays.asList("Authorization"));
