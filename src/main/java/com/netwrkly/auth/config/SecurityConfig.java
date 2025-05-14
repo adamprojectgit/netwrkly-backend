@@ -4,6 +4,7 @@ import com.netwrkly.auth.filter.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -36,37 +37,40 @@ public class SecurityConfig {
     private UserDetailsService userDetailsService;
     
     @Bean
-public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http
-        .csrf(csrf -> csrf.disable())
-        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-        .headers(headers -> headers.frameOptions(frame -> frame.deny()))
-        .authorizeHttpRequests(auth -> auth
-            // allow pre-flight CORS checks
-            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
-            // your existing rules
-            .requestMatchers("/api/auth/**").permitAll()
-            .requestMatchers("/api/uploads/**").permitAll()
-            .requestMatchers("/api/health").permitAll()
-            .requestMatchers("/api/admin/**").hasRole("ADMIN")
-            .requestMatchers("/api/creator/**").hasRole("CREATOR")
-            .requestMatchers("/api/brand/**").hasRole("BRAND")
-
-            // everything else needs authentication
-            .anyRequest().authenticated()
-        )
-        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authenticationProvider(authenticationProvider())
-        .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-
-    return http.build();
-}
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable())
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .headers(headers -> headers
+                .frameOptions(frame -> frame.deny())
+            )
+            .authorizeHttpRequests(auth -> auth
+                // allow CORS Pre-flight requests
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                // public endpoints
+                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/uploads/**").permitAll()
+                .requestMatchers("/api/health").permitAll()
+                // role-based
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/creator/**").hasRole("CREATOR")
+                .requestMatchers("/api/brand/**").hasRole("BRAND")
+                // secure everything else
+                .anyRequest().authenticated()
+            )
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            .authenticationProvider(authenticationProvider())
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+        
+        return http.build();
+    }
     
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000", "https://netwrkly.app")); // Added production domain
+        configuration.setAllowedOrigins(List.of("http://localhost:3000", "https://netwrkly.app"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
         configuration.setExposedHeaders(Arrays.asList("Authorization"));
@@ -94,6 +98,6 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
     
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(12); // Increased strength factor
+        return new BCryptPasswordEncoder(12);
     }
-} 
+}
