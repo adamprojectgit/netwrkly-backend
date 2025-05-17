@@ -4,6 +4,7 @@ import com.netwrkly.auth.model.User;
 import com.netwrkly.auth.repository.UserRepository;
 import com.netwrkly.auth.security.RateLimiter;
 import com.netwrkly.auth.validation.PasswordPolicyValidator;
+import com.google.firebase.auth.FirebaseAuth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -88,7 +91,20 @@ public class AuthenticationService {
     
     @Transactional
     public User registerFirebaseUser(String email, String firebaseUid, User.Role role) {
-        return userService.registerFirebaseUser(email, firebaseUid, role);
+        try {
+            // Register user in database
+            User user = userService.registerFirebaseUser(email, firebaseUid, role);
+            
+            // Set custom claims in Firebase
+            Map<String, Object> claims = new HashMap<>();
+            claims.put("role", role.name());
+            FirebaseAuth.getInstance().setCustomUserClaims(firebaseUid, claims);
+            
+            return user;
+        } catch (Exception e) {
+            logger.error("Failed to register Firebase user: {}", email, e);
+            throw new RuntimeException("Failed to register user: " + e.getMessage());
+        }
     }
     
     public String login(String email, String password) {
