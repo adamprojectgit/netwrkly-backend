@@ -41,6 +41,11 @@ public class Brief {
     @JsonIgnoreProperties({"password", "verificationToken", "resetPasswordToken", "resetPasswordTokenExpiry", "enabled", "accountNonExpired", "accountNonLocked", "credentialsNonExpired", "authorities"})
     private User creator;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "brand_id", nullable = false)
+    @JsonIgnoreProperties({"password", "verificationToken", "resetPasswordToken", "resetPasswordTokenExpiry", "enabled", "accountNonExpired", "accountNonLocked", "credentialsNonExpired", "authorities"})
+    private User brand;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 

@@ -26,8 +26,8 @@ public class BriefService {
     }
 
     @Transactional
-    public Brief createBrief(CreateBriefRequest request, User creator) {
-        log.debug("Creating new brief with title: {} for creator: {}", request.getTitle(), creator.getEmail());
+    public Brief createBrief(CreateBriefRequest request, User user) {
+        log.debug("Creating new brief with title: {} for creator: {}", request.getTitle(), user.getEmail());
         try {
             Brief brief = new Brief();
             brief.setTitle(request.getTitle());
@@ -35,7 +35,8 @@ public class BriefService {
             brief.setAsk(request.getAsk());
             brief.setDeliverables(request.getDeliverables());
             brief.setBudget(request.getBudget());
-            brief.setCreator(creator);
+            brief.setCreator(user);
+            brief.setBrand(user);
             brief.setStatus(BriefStatus.DRAFT); // Set initial status
             
             Brief savedBrief = briefRepository.save(brief);

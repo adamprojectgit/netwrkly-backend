@@ -20,7 +20,12 @@ public class BriefController {
 
     @GetMapping
     public ResponseEntity<List<Brief>> getBriefs(@AuthenticationPrincipal User user) {
-        List<Brief> briefs = briefService.getBriefsByCreator(user);
+        List<Brief> briefs;
+        if (user.getRole().equals("ROLE_BRAND")) {
+            briefs = briefService.getBriefsByBrand(user);
+        } else {
+            briefs = briefService.getBriefsByCreator(user);
+        }
         return ResponseEntity.ok(briefs);
     }
 
