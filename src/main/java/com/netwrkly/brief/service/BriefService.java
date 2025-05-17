@@ -25,6 +25,12 @@ public class BriefService {
         return briefRepository.findByCreatorOrderByCreatedAtDesc(creator);
     }
 
+    @Transactional(readOnly = true)
+    public List<Brief> getBriefsByBrand(User brand) {
+        log.debug("Fetching briefs for brand: {}", brand.getEmail());
+        return briefRepository.findByBrand(brand);
+    }
+
     @Transactional
     public Brief createBrief(CreateBriefRequest request, User user) {
         log.debug("Creating new brief with title: {} for creator: {}", request.getTitle(), user.getEmail());
