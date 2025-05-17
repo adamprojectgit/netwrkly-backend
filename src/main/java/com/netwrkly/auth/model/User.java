@@ -13,7 +13,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Entity
-@Table(name = "app_user")
+@Table(name = "\"app_user\"")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -28,7 +28,7 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true)
     private String firebaseUid;
     
-    @Column(nullable = true, columnDefinition = "VARCHAR(255) NULL")
+    @Column
     private String password;
     
     @Enumerated(EnumType.STRING)
