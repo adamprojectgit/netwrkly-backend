@@ -28,7 +28,7 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true)
     private String firebaseUid;
     
-    @Column(nullable = true)
+    @Column(nullable = true, columnDefinition = "VARCHAR(255) NULL")
     private String password;
     
     @Enumerated(EnumType.STRING)
