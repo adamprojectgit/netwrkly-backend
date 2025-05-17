@@ -43,6 +43,9 @@ public class AuthenticationService {
     @Autowired
     private RateLimiter rateLimiter;
     
+    @Autowired
+    private UserService userService;
+    
     @Transactional
     public String register(User user) {
         try {
@@ -81,6 +84,11 @@ public class AuthenticationService {
             logger.error("Registration failed for user: {}", user.getEmail(), e);
             throw e;
         }
+    }
+    
+    @Transactional
+    public User registerFirebaseUser(String email, String firebaseUid, User.Role role) {
+        return userService.registerFirebaseUser(email, firebaseUid, role);
     }
     
     public String login(String email, String password) {
