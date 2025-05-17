@@ -41,21 +41,18 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .headers(headers -> headers
-                .frameOptions(frame -> frame.deny())
-            )
             .authorizeHttpRequests(auth -> auth
-                // allow CORS Pre-flight requests
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                // public endpoints
+                // Public endpoints
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/uploads/**").permitAll()
                 .requestMatchers("/api/health").permitAll()
-                // role-based
+                // Role-based access
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/creator-profiles/**").permitAll() // Allow viewing creator profiles
                 .requestMatchers("/api/creator/**").hasRole("CREATOR")
                 .requestMatchers("/api/brand/**").hasRole("BRAND")
-                // secure everything else
+                .requestMatchers("/api/briefs/**").permitAll() // Allow viewing briefs
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
@@ -70,12 +67,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000", "https://netwrkly.app"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "https://netwrkly.com"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
-        configuration.setExposedHeaders(Arrays.asList("Authorization"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L);
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
@@ -98,6 +93,6 @@ public class SecurityConfig {
     
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(12);
+        return new BCryptPasswordEncoder();
     }
 }
