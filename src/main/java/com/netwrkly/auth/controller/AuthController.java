@@ -2,6 +2,8 @@ package com.netwrkly.auth.controller;
 
 import com.netwrkly.auth.model.User;
 import com.netwrkly.auth.service.AuthenticationService;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,12 +19,42 @@ public class AuthController {
     private AuthenticationService authService;
     
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody User user) {
+    public ResponseEntity<?> register(
+            @RequestHeader("Authorization") String bearerToken,
+            @RequestBody FirebaseRegisterRequest request) {
         try {
-            String message = authService.register(user);
-            return ResponseEntity.ok(message);
+            // 1. Verify the Firebase ID token
+            if (bearerToken == null || !bearerToken.startsWith("Bearer ")) {
+                return ResponseEntity.status(401).body("Missing or invalid Authorization header");
+            }
+            String idToken = bearerToken.substring(7);
+            FirebaseToken decoded = FirebaseAuth.getInstance().verifyIdToken(idToken);
+
+            // 2. Extract UID and email from token
+            String tokenUid = decoded.getUid();
+            String tokenEmail = decoded.getEmail();
+
+            // 3. Ensure UID and email match the request body
+            if (!tokenUid.equals(request.getFirebaseUid()) || !tokenEmail.equals(request.getEmail())) {
+                return ResponseEntity.status(403).body("Token UID/email does not match request body");
+            }
+
+            // 4. Register user in our database
+            User user = authService.registerFirebaseUser(
+                request.getEmail(),
+                request.getFirebaseUid(),
+                User.Role.valueOf(request.getRole())
+            );
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "User registered successfully");
+            response.put("user", new UserResponse(user));
+
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            Map<String, String> response = new HashMap<>();
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
             response.put("message", e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
