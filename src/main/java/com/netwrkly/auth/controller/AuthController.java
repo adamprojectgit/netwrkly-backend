@@ -1,5 +1,6 @@
 package com.netwrkly.auth.controller;
 
+import com.netwrkly.auth.dto.FirebaseRegisterRequest;
 import com.netwrkly.auth.model.User;
 import com.netwrkly.auth.service.AuthenticationService;
 import com.google.firebase.auth.FirebaseAuth;
