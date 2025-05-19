@@ -43,7 +43,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
         // Skip authentication for public endpoints
-        if (isPublicPath(request.getRequestURI())) {
+        if (isPublicPath(request.getRequestURI(), request)) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -78,9 +78,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
     
-    private boolean isPublicPath(String requestUri) {
+    private boolean isPublicPath(String requestUri, HttpServletRequest request) {
         // Only GET requests to /api/briefs are public
-        if (requestUri.equals("/api/briefs")) {
+        if (requestUri.equals("/api/briefs") && request.getMethod().equals("GET")) {
             return true;
         }
         return PUBLIC_PATHS.stream().anyMatch(requestUri::endsWith);
