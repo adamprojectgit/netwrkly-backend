@@ -79,6 +79,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
     
     private boolean isPublicPath(String requestUri) {
+        // Only GET requests to /api/briefs are public
+        if (requestUri.equals("/api/briefs")) {
+            return true;
+        }
         return PUBLIC_PATHS.stream().anyMatch(requestUri::endsWith);
     }
 } 

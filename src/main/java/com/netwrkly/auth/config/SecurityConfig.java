@@ -52,7 +52,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/creator-profiles/**").permitAll() // Allow viewing creator profiles
                 .requestMatchers("/api/creator/**").hasRole("CREATOR")
                 .requestMatchers("/api/brand/**").hasRole("BRAND")
-                .requestMatchers("/api/briefs/**").permitAll() // Allow viewing briefs
+                .requestMatchers(HttpMethod.GET, "/api/briefs/**").permitAll() // Allow viewing briefs
+                .requestMatchers(HttpMethod.POST, "/api/briefs/**").hasRole("BRAND") // Require BRAND role for creating briefs
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
