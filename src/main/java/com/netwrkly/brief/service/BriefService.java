@@ -74,6 +74,6 @@ public class BriefService {
     @Transactional(readOnly = true)
     public List<Brief> getAllPublicBriefs() {
         log.debug("Fetching all public briefs");
-        return briefRepository.findByStatus(BriefStatus.PUBLIC);
+        return briefRepository.findByStatus(BriefStatus.ACTIVE);
     }
 } 
