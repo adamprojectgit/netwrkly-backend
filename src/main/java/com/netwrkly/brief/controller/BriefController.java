@@ -19,7 +19,7 @@ public class BriefController {
     private final BriefService briefService;
 
     @GetMapping
-    public ResponseEntity<List<Brief>> getBriefs(@AuthenticationPrincipal(required = false) User user) {
+    public ResponseEntity<List<Brief>> getBriefs(@AuthenticationPrincipal User user) {
         List<Brief> briefs;
         if (user != null) {
             if (user.getRole().equals(User.Role.BRAND)) {
