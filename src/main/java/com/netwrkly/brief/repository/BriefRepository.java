@@ -10,4 +10,5 @@ import java.util.List;
 public interface BriefRepository extends JpaRepository<Brief, Long> {
     List<Brief> findByCreatorOrderByCreatedAtDesc(User creator);
     List<Brief> findByBrand(User brand);
+    List<Brief> findByStatus(BriefStatus status);
 } 

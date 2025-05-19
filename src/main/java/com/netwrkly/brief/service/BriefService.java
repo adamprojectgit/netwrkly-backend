@@ -70,4 +70,10 @@ public class BriefService {
         log.debug("Successfully updated brief {} status to {}", briefId, newStatus);
         return updatedBrief;
     }
+
+    @Transactional(readOnly = true)
+    public List<Brief> getAllPublicBriefs() {
+        log.debug("Fetching all public briefs");
+        return briefRepository.findByStatus(BriefStatus.PUBLIC);
+    }
 } 

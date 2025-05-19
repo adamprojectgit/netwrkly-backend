@@ -19,12 +19,17 @@ public class BriefController {
     private final BriefService briefService;
 
     @GetMapping
-    public ResponseEntity<List<Brief>> getBriefs(@AuthenticationPrincipal User user) {
+    public ResponseEntity<List<Brief>> getBriefs(@AuthenticationPrincipal(required = false) User user) {
         List<Brief> briefs;
-        if (user.getRole().equals("ROLE_BRAND")) {
-            briefs = briefService.getBriefsByBrand(user);
+        if (user != null) {
+            if (user.getRole().equals(User.Role.BRAND)) {
+                briefs = briefService.getBriefsByBrand(user);
+            } else {
+                briefs = briefService.getBriefsByCreator(user);
+            }
         } else {
-            briefs = briefService.getBriefsByCreator(user);
+            // Return all public briefs for unauthenticated users
+            briefs = briefService.getAllPublicBriefs();
         }
         return ResponseEntity.ok(briefs);
     }
