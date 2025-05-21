@@ -1,6 +1,9 @@
 package com.netwrkly.auth.filter;
 
 import com.netwrkly.auth.service.JwtService;
+import com.netwrkly.auth.service.UserService;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseToken;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,6 +38,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private UserDetailsService userDetailsService;
     
+    @Autowired
+    private UserService userService;
+    
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,
@@ -48,7 +54,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         final String authHeader = request.getHeader("Authorization");
-        final String jwt;
+        final String token;
         final String userEmail;
         
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -56,13 +62,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
         
-        jwt = authHeader.substring(7);
-        userEmail = jwtService.extractUsername(jwt);
-        
-        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+        token = authHeader.substring(7);
+        try {
+            // Verify Firebase token
+            FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(token);
+            userEmail = decodedToken.getEmail();
             
-            if (jwtService.isTokenValid(jwt, userDetails)) {
+            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+                
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,
@@ -73,6 +81,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 );
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
+        } catch (Exception e) {
+            logger.error("Error verifying Firebase token: {}", e.getMessage());
         }
         filterChain.doFilter(request, response);
     }
