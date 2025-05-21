@@ -6,35 +6,41 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 public class UserService {
-    
+    private final UserRepository userRepository;
+
     @Autowired
-    private UserRepository userRepository;
-    
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
     @Transactional
-    public User registerFirebaseUser(String email, String firebaseUid, User.Role role) {
-        // Check if user already exists
-        if (userRepository.existsByEmail(email)) {
-            throw new RuntimeException("User with this email already exists");
+    public User registerFirebaseUser(String email, String firebaseUid, String role) {
+        Optional<User> existingUser = userRepository.findByEmail(email);
+        if (existingUser.isPresent()) {
+            return existingUser.get();
         }
-        
-        if (userRepository.existsByFirebaseUid(firebaseUid)) {
-            throw new RuntimeException("User with this Firebase UID already exists");
-        }
-        
-        // Create new user
+
         User user = new User();
         user.setEmail(email);
         user.setFirebaseUid(firebaseUid);
         user.setRole(role);
         user.setEnabled(true);
-        user.setEmailVerified(false);
-        // Password is not set for Firebase users
-        
+        user.setEmailVerified(true);
         return userRepository.save(user);
     }
-    
+
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    public Optional<User> findByFirebaseUid(String firebaseUid) {
+        return userRepository.findByFirebaseUid(firebaseUid);
+    }
+
     public User getCurrentUser() {
         // TODO: Implement getting current user from security context
         return null;

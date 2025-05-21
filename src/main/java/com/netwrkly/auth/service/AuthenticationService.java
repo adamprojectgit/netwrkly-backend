@@ -11,6 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -19,14 +22,14 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.Optional;
 
 @Service
-public class AuthenticationService {
+public class AuthenticationService implements UserDetailsService {
     
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationService.class);
     
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
     
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -48,6 +51,17 @@ public class AuthenticationService {
     
     @Autowired
     private UserService userService;
+    
+    @Autowired
+    public AuthenticationService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+    
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+    }
     
     @Transactional
     public String register(User user) {
@@ -90,21 +104,19 @@ public class AuthenticationService {
     }
     
     @Transactional
-    public User registerFirebaseUser(String email, String firebaseUid, User.Role role) {
-        try {
-            // Register user in database
-            User user = userService.registerFirebaseUser(email, firebaseUid, role);
-            
-            // Set custom claims in Firebase
-            Map<String, Object> claims = new HashMap<>();
-            claims.put("role", role.name());
-            FirebaseAuth.getInstance().setCustomUserClaims(firebaseUid, claims);
-            
-            return user;
-        } catch (Exception e) {
-            logger.error("Failed to register Firebase user: {}", email, e);
-            throw new RuntimeException("Failed to register user: " + e.getMessage());
+    public User registerFirebaseUser(String email, String firebaseUid, String role) {
+        Optional<User> existingUser = userRepository.findByEmail(email);
+        if (existingUser.isPresent()) {
+            return existingUser.get();
         }
+
+        User user = new User();
+        user.setEmail(email);
+        user.setFirebaseUid(firebaseUid);
+        user.setRole(role);
+        user.setEnabled(true);
+        user.setEmailVerified(true);
+        return userRepository.save(user);
     }
     
     public String login(String email, String password) {
