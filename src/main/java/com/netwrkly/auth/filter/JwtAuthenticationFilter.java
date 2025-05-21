@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -62,7 +63,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String userEmail;
         
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
             return;
         }
         
@@ -84,11 +85,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         new WebAuthenticationDetailsSource().buildDetails(request)
                 );
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+                filterChain.doFilter(request, response);
+            } else {
+                response.setStatus(HttpStatus.UNAUTHORIZED.value());
             }
         } catch (Exception e) {
             logger.error("Error verifying Firebase token", e);
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
         }
-        filterChain.doFilter(request, response);
     }
     
     private boolean isPublicPath(String requestUri, HttpServletRequest request) {
