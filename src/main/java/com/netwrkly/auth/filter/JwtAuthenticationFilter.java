@@ -85,10 +85,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         new WebAuthenticationDetailsSource().buildDetails(request)
                 );
                 SecurityContextHolder.getContext().setAuthentication(authToken);
-                filterChain.doFilter(request, response);
-            } else {
-                response.setStatus(HttpStatus.UNAUTHORIZED.value());
             }
+            filterChain.doFilter(request, response);
         } catch (Exception e) {
             logger.error("Error verifying Firebase token", e);
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
