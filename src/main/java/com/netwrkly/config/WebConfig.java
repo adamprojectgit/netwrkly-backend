@@ -30,11 +30,14 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addMapping("/**")
                 .allowedOrigins(
                     "http://localhost:3000",
+                    "https://netwrkly.app",
                     "https://netwrkly-dd75a.web.app",
                     "https://netwrkly.com"
                 )
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                .allowedHeaders("*")
-                .allowCredentials(true);
+                .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
+                .allowedHeaders("Authorization", "Content-Type", "X-Requested-With")
+                .exposedHeaders("Authorization")
+                .allowCredentials(true)
+                .maxAge(3600);
     }
 } 
