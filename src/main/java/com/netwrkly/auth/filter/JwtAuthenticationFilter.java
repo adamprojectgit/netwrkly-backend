@@ -26,8 +26,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         "/api/auth/login",
         "/api/auth/verify",
         "/api/auth/forgot-password",
-        "/api/auth/reset-password",
-        "/api/briefs"
+        "/api/auth/reset-password"
     );
     
     @Autowired
@@ -83,6 +82,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (requestUri.equals("/api/briefs") && request.getMethod().equals("GET")) {
             return true;
         }
+        // Check if the path is in PUBLIC_PATHS
         return PUBLIC_PATHS.stream().anyMatch(requestUri::endsWith);
     }
 } 
