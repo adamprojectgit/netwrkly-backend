@@ -3,6 +3,7 @@ package com.netwrkly.auth.controller;
 import com.netwrkly.auth.dto.FirebaseRegisterRequest;
 import com.netwrkly.auth.model.User;
 import com.netwrkly.auth.service.AuthenticationService;
+import com.netwrkly.auth.service.UserService;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,90 +17,80 @@ import java.util.Map;
 @RequestMapping("/api/auth")
 public class AuthController {
     
+    private final AuthenticationService authenticationService;
+    private final UserService userService;
+    
     @Autowired
-    private AuthenticationService authService;
+    public AuthController(AuthenticationService authenticationService, UserService userService) {
+        this.authenticationService = authenticationService;
+        this.userService = userService;
+    }
     
     @PostMapping("/register")
-    public ResponseEntity<?> register(
-            @RequestHeader("Authorization") String bearerToken,
-            @RequestBody FirebaseRegisterRequest request) {
+    public ResponseEntity<?> register(@RequestBody User user) {
         try {
-            // 1. Verify the Firebase ID token
-            if (bearerToken == null || !bearerToken.startsWith("Bearer ")) {
-                return ResponseEntity.status(401).body("Missing or invalid Authorization header");
-            }
-            String idToken = bearerToken.substring(7);
-            FirebaseToken decoded = FirebaseAuth.getInstance().verifyIdToken(idToken);
-
-            // 2. Extract UID and email from token
-            String tokenUid = decoded.getUid();
-            String tokenEmail = decoded.getEmail();
-
-            // 3. Ensure UID and email match the request body
-            if (!tokenUid.equals(request.getFirebaseUid()) || !tokenEmail.equals(request.getEmail())) {
-                return ResponseEntity.status(403).body("Token UID/email does not match request body");
-            }
-
-            // 4. Register user in our database
-            User user = authService.registerFirebaseUser(
-                request.getEmail(),
-                request.getFirebaseUid(),
-                User.Role.valueOf(request.getRole())
-            );
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            response.put("message", "User registered successfully");
-            response.put("user", new UserResponse(user));
-
-            return ResponseEntity.ok(response);
+            String message = authenticationService.register(user);
+            return ResponseEntity.ok(Map.of("message", message));
         } catch (Exception e) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", false);
-            response.put("message", e.getMessage());
-            return ResponseEntity.badRequest().body(response);
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+    
+    @PostMapping("/register/firebase")
+    public ResponseEntity<?> registerFirebaseUser(@RequestBody Map<String, String> request) {
+        try {
+            String email = request.get("email");
+            String firebaseUid = request.get("firebaseUid");
+            String role = request.get("role");
+            
+            if (email == null || firebaseUid == null || role == null) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Missing required fields"));
+            }
+
+            User user = authenticationService.registerFirebaseUser(email, firebaseUid, role);
+            return ResponseEntity.ok(user);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
     
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<?> login(@RequestBody Map<String, String> credentials) {
         try {
-            String token = authService.login(request.getEmail(), request.getPassword());
-            return ResponseEntity.ok(new LoginResponse(token));
+            String token = authenticationService.login(credentials.get("email"), credentials.get("password"));
+            return ResponseEntity.ok(Map.of("token", token));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
     
-    @GetMapping("/verify")
+    @PostMapping("/verify")
     public ResponseEntity<?> verifyEmail(@RequestParam String token) {
         try {
-            boolean verified = authService.verifyEmail(token);
-            return ResponseEntity.ok("Email verified successfully");
+            boolean verified = authenticationService.verifyEmail(token);
+            return ResponseEntity.ok(Map.of("verified", verified));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
     
     @PostMapping("/forgot-password")
-    public ResponseEntity<?> forgotPassword(@RequestParam String email) {
+    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
         try {
-            authService.initiatePasswordReset(email);
-            return ResponseEntity.ok("If your email is registered, you will receive a password reset link");
+            authenticationService.initiatePasswordReset(request.get("email"));
+            return ResponseEntity.ok(Map.of("message", "Password reset email sent"));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
     
     @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(
-            @RequestParam String token,
-            @RequestBody ResetPasswordRequest request) {
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
         try {
-            boolean reset = authService.resetPassword(token, request.getNewPassword());
-            return ResponseEntity.ok("Password reset successfully");
+            boolean reset = authenticationService.resetPassword(request.get("token"), request.get("newPassword"));
+            return ResponseEntity.ok(Map.of("reset", reset));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
     
@@ -107,7 +98,7 @@ public class AuthController {
     public ResponseEntity<?> getCurrentUser(@RequestHeader("Authorization") String authHeader) {
         try {
             String token = authHeader.substring(7); // Remove "Bearer " prefix
-            User user = authService.getCurrentUser(token);
+            User user = authenticationService.getCurrentUser(token);
             return ResponseEntity.ok(new UserResponse(user));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -173,7 +164,7 @@ public class AuthController {
         public UserResponse(User user) {
             this.id = user.getId();
             this.email = user.getEmail();
-            this.role = user.getRole().name();
+            this.role = user.getRole();
             this.emailVerified = user.isEmailVerified();
             this.createdAt = user.getCreatedAt().toString();
         }

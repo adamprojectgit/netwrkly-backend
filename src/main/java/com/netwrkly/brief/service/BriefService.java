@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +37,7 @@ public class BriefService {
         log.debug("Creating new brief with title: {} for creator: {}", request.getTitle(), user.getEmail());
         try {
             // Verify user has BRAND role
-            if (user.getRole() != User.Role.BRAND) {
+            if (!"BRAND".equals(user.getRole())) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only users with BRAND role can create briefs");
             }
 
@@ -80,5 +81,13 @@ public class BriefService {
     public List<Brief> getAllPublicBriefs() {
         log.debug("Fetching all public briefs");
         return briefRepository.findByStatus(BriefStatus.ACTIVE);
+    }
+
+    public List<Brief> getAllBriefs() {
+        return briefRepository.findAll();
+    }
+
+    public Optional<Brief> getBriefById(Long id) {
+        return briefRepository.findById(id);
     }
 } 

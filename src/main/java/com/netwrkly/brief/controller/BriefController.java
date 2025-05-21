@@ -22,7 +22,7 @@ public class BriefController {
     public ResponseEntity<List<Brief>> getBriefs(@AuthenticationPrincipal User user) {
         List<Brief> briefs;
         if (user != null) {
-            if (user.getRole().equals(User.Role.BRAND)) {
+            if (user.getRole().equals("BRAND")) {
                 briefs = briefService.getBriefsByBrand(user);
             } else {
                 briefs = briefService.getBriefsByCreator(user);
