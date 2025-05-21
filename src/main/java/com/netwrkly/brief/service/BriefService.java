@@ -35,6 +35,11 @@ public class BriefService {
     public Brief createBrief(CreateBriefRequest request, User user) {
         log.debug("Creating new brief with title: {} for creator: {}", request.getTitle(), user.getEmail());
         try {
+            // Verify user has BRAND role
+            if (user.getRole() != User.Role.BRAND) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only users with BRAND role can create briefs");
+            }
+
             Brief brief = new Brief();
             brief.setTitle(request.getTitle());
             brief.setBackground(request.getBackground());
