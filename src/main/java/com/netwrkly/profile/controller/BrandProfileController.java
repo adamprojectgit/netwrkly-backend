@@ -36,10 +36,22 @@ public class BrandProfileController {
     @PostMapping("/logo")
     public ResponseEntity<String> uploadLogo(@RequestParam("file") MultipartFile file) {
         try {
+            if (file == null) {
+                return ResponseEntity.badRequest().body("No file provided");
+            }
+            
+            if (!file.getContentType().startsWith("image/")) {
+                return ResponseEntity.badRequest().body("Only image files are allowed");
+            }
+            
             String fileUrl = brandProfileService.uploadLogo(file);
             return ResponseEntity.ok(fileUrl);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         } catch (IOException e) {
             return ResponseEntity.internalServerError().body("Failed to upload file: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("An unexpected error occurred: " + e.getMessage());
         }
     }
 

@@ -62,14 +62,18 @@ public class BrandProfileService {
 
     public String uploadLogo(MultipartFile file) throws IOException {
         if (file.isEmpty()) {
+            logger.error("Attempted to upload empty file");
             throw new IllegalArgumentException("Failed to store empty file");
         }
 
         String filename = UUID.randomUUID().toString() + "_" + StringUtils.cleanPath(file.getOriginalFilename());
+        logger.info("Processing file upload - Original name: {}, Size: {}, Content type: {}", 
+            file.getOriginalFilename(), file.getSize(), file.getContentType());
         
         try {
             // Check if the filename contains invalid characters
             if (filename.contains("..")) {
+                logger.error("Invalid filename detected: {}", filename);
                 throw new IllegalArgumentException("Filename contains invalid path sequence " + filename);
             }
 
@@ -84,7 +88,7 @@ public class BrandProfileService {
             
             return fileUrl;
         } catch (IOException ex) {
-            logger.error("Failed to store file " + filename, ex);
+            logger.error("Failed to store file {}: {}", filename, ex.getMessage(), ex);
             throw new IOException("Failed to store file " + filename, ex);
         }
     }
