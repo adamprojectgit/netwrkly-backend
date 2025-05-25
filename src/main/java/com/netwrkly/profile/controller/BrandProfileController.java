@@ -37,13 +37,8 @@ public class BrandProfileController {
     @PreAuthorize("hasRole('ROLE_BRAND')")
     public ResponseEntity<String> uploadLogo(@RequestParam("file") MultipartFile file) {
         log.info("Uploading logo for brand profile");
-        try {
-            String logoUrl = brandProfileService.uploadLogo(file);
-            return ResponseEntity.ok(logoUrl);
-        } catch (IOException e) {
-            log.error("Failed to upload logo", e);
-            return ResponseEntity.internalServerError().body("Failed to upload logo: " + e.getMessage());
-        }
+        String logoUrl = brandProfileService.storeLogo(file);
+        return ResponseEntity.ok(logoUrl);
     }
 
     @DeleteMapping("/logo/{filename}")
